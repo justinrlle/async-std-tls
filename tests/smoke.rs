@@ -1,7 +1,13 @@
 #![warn(rust_2018_idioms)]
 
+use async_std::{
+    net::{TcpListener, TcpStream},
+    task,
+};
+use async_std_tls;
 use cfg_if::cfg_if;
 use env_logger;
+use futures::io::{AsyncReadExt, AsyncWrite, AsyncWriteExt, Error, ErrorKind};
 use futures::join;
 use futures::stream::StreamExt;
 use native_tls;
@@ -10,12 +16,6 @@ use std::io::Write;
 use std::marker::Unpin;
 use std::process::Command;
 use std::ptr;
-use futures::io::{AsyncReadExt, AsyncWrite, AsyncWriteExt, Error, ErrorKind};
-use async_std::{
-    net::{TcpListener, TcpStream},
-    task,
-};
-use async_std_tls;
 
 macro_rules! t {
     ($e:expr) => {

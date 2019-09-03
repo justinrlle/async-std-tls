@@ -1,15 +1,12 @@
 #![warn(rust_2018_idioms)]
 
+use async_std::{net::TcpStream, task};
+use async_std_tls;
 use cfg_if::cfg_if;
 use env_logger;
 use native_tls::TlsConnector;
 use std::io::{self, Error};
 use std::net::ToSocketAddrs;
-use async_std::{
-    net::TcpStream,
-    task,
-};
-use async_std_tls;
 
 macro_rules! t {
     ($e:expr) => {
@@ -105,9 +102,7 @@ async fn get_host(host: &'static str) -> Error {
 
 #[test]
 fn expired() {
-    task::block_on(async {
-        assert_expired_error(&get_host("expired.badssl.com").await)
-    })
+    task::block_on(async { assert_expired_error(&get_host("expired.badssl.com").await) })
 }
 
 // TODO: the OSX builders on Travis apparently fail this tests spuriously?
@@ -115,21 +110,15 @@ fn expired() {
 #[test]
 #[cfg_attr(all(target_os = "macos", feature = "force-openssl"), ignore)]
 fn wrong_host() {
-    task::block_on(async {
-        assert_wrong_host(&get_host("wrong.host.badssl.com").await)
-    })
+    task::block_on(async { assert_wrong_host(&get_host("wrong.host.badssl.com").await) })
 }
 
 #[test]
 fn self_signed() {
-    task::block_on(async {
-        assert_self_signed(&get_host("self-signed.badssl.com").await)
-    })
+    task::block_on(async { assert_self_signed(&get_host("self-signed.badssl.com").await) })
 }
 
 #[test]
 fn untrusted_root() {
-    task::block_on(async {
-        assert_untrusted_root(&get_host("untrusted-root.badssl.com").await)
-    })
+    task::block_on(async { assert_untrusted_root(&get_host("untrusted-root.badssl.com").await) })
 }

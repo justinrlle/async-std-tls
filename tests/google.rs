@@ -1,17 +1,14 @@
 #![warn(rust_2018_idioms)]
 
+use async_std::{net::TcpStream, task};
+use async_std_tls;
 use cfg_if::cfg_if;
 use env_logger;
+use futures::io::{AsyncReadExt, AsyncWriteExt};
 use native_tls;
 use native_tls::TlsConnector;
 use std::io;
 use std::net::ToSocketAddrs;
-use futures::io::{AsyncReadExt, AsyncWriteExt};
-use async_std::{
-    net::TcpStream,
-    task,
-};
-use async_std_tls;
 
 macro_rules! t {
     ($e:expr) => {

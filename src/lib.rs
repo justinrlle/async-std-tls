@@ -19,11 +19,11 @@
 
 pub extern crate native_tls;
 pub use native_tls::{
-    TlsAcceptor as NativeTlsAcceptor,
-    TlsConnector as NativeTlsConnector,
+    TlsAcceptor as NativeTlsAcceptor, TlsConnector as NativeTlsConnector,
     TlsStream as NativeTlsStream,
 };
 
+use futures::io::{AsyncRead, AsyncWrite, Initializer};
 use native_tls::{Error, HandshakeError, MidHandshakeTlsStream};
 use std::fmt;
 use std::future::Future;
@@ -32,7 +32,6 @@ use std::marker::Unpin;
 use std::pin::Pin;
 use std::ptr::null_mut;
 use std::task::{Context, Poll};
-use futures::io::{AsyncRead, AsyncWrite, Initializer};
 
 #[derive(Debug)]
 struct AllowStd<S> {
@@ -59,8 +58,6 @@ pub struct TlsConnector(NativeTlsConnector);
 /// method.
 #[derive(Clone)]
 pub struct TlsAcceptor(NativeTlsAcceptor);
-
-
 
 struct MidHandshake<S>(Option<MidHandshakeTlsStream<AllowStd<S>>>);
 
@@ -203,9 +200,7 @@ where
 
 async fn handshake<F, S>(f: F, stream: S) -> Result<TlsStream<S>, Error>
 where
-    F: FnOnce(
-            AllowStd<S>,
-        ) -> Result<NativeTlsStream<AllowStd<S>>, HandshakeError<AllowStd<S>>>
+    F: FnOnce(AllowStd<S>) -> Result<NativeTlsStream<AllowStd<S>>, HandshakeError<AllowStd<S>>>
         + Unpin,
     S: AsyncRead + AsyncWrite + Unpin,
 {
@@ -220,9 +215,7 @@ where
 
 impl<F, S> Future for StartedHandshakeFuture<F, S>
 where
-    F: FnOnce(
-            AllowStd<S>,
-        ) -> Result<NativeTlsStream<AllowStd<S>>, HandshakeError<AllowStd<S>>>
+    F: FnOnce(AllowStd<S>) -> Result<NativeTlsStream<AllowStd<S>>, HandshakeError<AllowStd<S>>>
         + Unpin,
     S: Unpin,
     AllowStd<S>: Read + Write,
