@@ -11,7 +11,7 @@ variables:
 
 jobs:
 # Check formatting
-- name: rustfmt
+- job: rustfmt
   displayName: Check rustfmt
   steps:
     - template: ci/install-rust.yml
@@ -23,7 +23,7 @@ jobs:
       displayName: Check formating
 
 # Apply clippy lints to all crates
-- name: clippy
+- job: clippy
   displayName: Check clippy
   steps:
     - template: ci/install-rust.yml
@@ -34,7 +34,7 @@ jobs:
         cargo clippy --all
       displayName: Run clippy
 
-- name: check
+- job: check
   displayName: Cargo check
   steps:
     - template: ci/install-rust.yml
@@ -44,7 +44,7 @@ jobs:
         cargo check --all
       displayName: Run cargo check
 
-- name: test
+- job: test
   displayName: Cargo test
   steps:
     - template: ci/install-rust.yml
