@@ -25,10 +25,10 @@ steps:
   - ${{ each component in parameters.components }}:
     - script: rustup component add ${{ component }}
 
-# All platforms.
-- script: |
-    rustup -V
-    rustup component list --installed
-    rustc -Vv
-    cargo -V
-  displayName: Query rust and cargo versions
+  # All platforms.
+  - script: |
+      rustup -V
+      rustup component list --installed
+      rustc -Vv
+      cargo -V
+    displayName: Query rust and cargo versions
