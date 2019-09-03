@@ -1,4 +1,28 @@
-//! A port of `tokio-tls` to `async-std`
+//! Async TLS streams ported from [`tokio-tls`] to [`async-std`].
+//!
+//! Taken from the documentation of [`tokio-tls`]:
+//!
+//! This library is an implementation of TLS streams using the most appropriate system library by
+//! default for negotiating the connection. That is, on Windows this library uses SChannel, on OSX
+//! it uses SecureTransport, and on other platforms it uses OpenSSL.
+//!
+//! Each TLS stream implements the `Read` and `Write` traits to interact and interoperate with the rest
+//! of the futures I/O ecosystem. Client connections initiated from this crate verify hostnames
+//! automatically and by default.
+//!
+//! This crate primarily exports this ability through two newtypes, `TlsConnector` and `TlsAcceptor`.
+//! These newtypes augment the functionality provided by the `native-tls` crate, on which this crate
+//! is built. Configuration of TLS parameters is still primarily done through the `native-tls` crate.
+//!
+//! [`tokio-tls`]: https://docs.rs/tokio-tls
+//! [`async-std`]: https://docs.rs/async-std
+
+pub extern crate native_tls;
+pub use native_tls::{
+    TlsAcceptor as NativeTlsAcceptor,
+    TlsConnector as NativeTlsConnector,
+    TlsStream as NativeTlsStream,
+};
 
 use native_tls::{Error, HandshakeError, MidHandshakeTlsStream};
 use std::fmt;
@@ -24,17 +48,17 @@ struct AllowStd<S> {
 /// data. Bytes read from a `TlsStream` are decrypted from `S` and bytes written
 /// to a `TlsStream` are encrypted when passing through to `S`.
 #[derive(Debug)]
-pub struct TlsStream<S>(native_tls::TlsStream<AllowStd<S>>);
+pub struct TlsStream<S>(NativeTlsStream<AllowStd<S>>);
 
 /// A wrapper around a `native_tls::TlsConnector`, providing an async `connect`
 /// method.
 #[derive(Clone)]
-pub struct TlsConnector(native_tls::TlsConnector);
+pub struct TlsConnector(NativeTlsConnector);
 
 /// A wrapper around a `native_tls::TlsAcceptor`, providing an async `accept`
 /// method.
 #[derive(Clone)]
-pub struct TlsAcceptor(native_tls::TlsAcceptor);
+pub struct TlsAcceptor(NativeTlsAcceptor);
 
 
 
@@ -126,7 +150,7 @@ fn cvt<T>(r: io::Result<T>) -> Poll<io::Result<T>> {
 impl<S> TlsStream<S> {
     fn with_context<F, R>(&mut self, ctx: &mut Context<'_>, f: F) -> R
     where
-        F: FnOnce(&mut native_tls::TlsStream<AllowStd<S>>) -> R,
+        F: FnOnce(&mut NativeTlsStream<AllowStd<S>>) -> R,
         AllowStd<S>: Read + Write,
     {
         self.0.get_mut().context = ctx as *mut _ as *mut ();
@@ -181,7 +205,7 @@ async fn handshake<F, S>(f: F, stream: S) -> Result<TlsStream<S>, Error>
 where
     F: FnOnce(
             AllowStd<S>,
-        ) -> Result<native_tls::TlsStream<AllowStd<S>>, HandshakeError<AllowStd<S>>>
+        ) -> Result<NativeTlsStream<AllowStd<S>>, HandshakeError<AllowStd<S>>>
         + Unpin,
     S: AsyncRead + AsyncWrite + Unpin,
 {
@@ -198,7 +222,7 @@ impl<F, S> Future for StartedHandshakeFuture<F, S>
 where
     F: FnOnce(
             AllowStd<S>,
-        ) -> Result<native_tls::TlsStream<AllowStd<S>>, HandshakeError<AllowStd<S>>>
+        ) -> Result<NativeTlsStream<AllowStd<S>>, HandshakeError<AllowStd<S>>>
         + Unpin,
     S: Unpin,
     AllowStd<S>: Read + Write,
@@ -256,8 +280,8 @@ impl fmt::Debug for TlsConnector {
     }
 }
 
-impl From<native_tls::TlsConnector> for TlsConnector {
-    fn from(inner: native_tls::TlsConnector) -> TlsConnector {
+impl From<NativeTlsConnector> for TlsConnector {
+    fn from(inner: NativeTlsConnector) -> TlsConnector {
         TlsConnector(inner)
     }
 }
@@ -287,8 +311,8 @@ impl fmt::Debug for TlsAcceptor {
     }
 }
 
-impl From<native_tls::TlsAcceptor> for TlsAcceptor {
-    fn from(inner: native_tls::TlsAcceptor) -> TlsAcceptor {
+impl From<NativeTlsAcceptor> for TlsAcceptor {
+    fn from(inner: NativeTlsAcceptor) -> TlsAcceptor {
         TlsAcceptor(inner)
     }
 }
