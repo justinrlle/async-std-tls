@@ -177,6 +177,9 @@ where
     S: AsyncRead + AsyncWrite + Unpin,
 {
     unsafe fn initializer(&self) -> Initializer {
+        // Note that this does not forward to `S` because the buffer is
+        // unconditionally filled in by OpenSSL, not the actual object `S`.
+        // We're decrypting bytes from `S` into the buffer above!
         Initializer::nop()
     }
 
