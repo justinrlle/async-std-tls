@@ -2,8 +2,12 @@
 name = "async-std-tls"
 version = "0.1.0"
 authors = ["JustinRlle <justin.rerolle@protonmail.com>"]
+license = "MIT"
 repository = "https://github.com/justinrlle/async-std-tls"
 edition = "2018"
+description = """
+An implementation of TLS/SSL stream for async-std based on native-tls
+"""
 publish = false
 
 [dependencies]
