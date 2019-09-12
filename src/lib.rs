@@ -23,7 +23,7 @@ pub use native_tls::{
     TlsStream as NativeTlsStream,
 };
 
-use futures::io::{AsyncRead, AsyncWrite, Initializer};
+use futures_io::{AsyncRead, AsyncWrite, Initializer};
 use native_tls::{Error, HandshakeError, MidHandshakeTlsStream};
 use std::fmt;
 use std::future::Future;
